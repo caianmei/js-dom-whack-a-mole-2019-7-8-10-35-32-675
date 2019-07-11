@@ -10,6 +10,7 @@ window.onload = function () {
     let timeUp = false;
     let score = 0;
     let gameTime = 10000;
+    let reGameTime = 10000;
 
 
     startBtn.addEventListener('click', function () {
@@ -32,9 +33,11 @@ window.onload = function () {
     function startGame() {
         resetScoreAndTime();
         peep();
-
         setTimeout(() => {
             // TODO: 写当游戏时间结束后要发生的事
+            startBtn.removeAttribute('style');
+            startBtn.innerHTML = 'Replay';
+            titleH1.innerHTML = 'Time Up!';
         }, gameTime)
     }
 
@@ -43,6 +46,13 @@ window.onload = function () {
      */
     function resetScoreAndTime() {
         // TODO: 写游戏的初始化设置
+        lastHole = null;
+        timeUp = false;
+        score = 0;
+        gameTime = 10000;
+        reGameTime = 10000;
+        scoreBoard.innerHTML = score;
+        titleH1.innerHTML = 'WHACK-A-MOLE!';
     }
 
     /**
@@ -62,8 +72,18 @@ window.onload = function () {
      * @returns {number}
      */
     function randomTime(min, max) {
-        // TODO: 写生成随机数的逻辑，
-        return 0;
+        // 写生成随机数的逻辑，
+        switch (arguments.length) {
+            case 1:
+                return parseInt(Math.random() * min + 1, 10);
+                break;
+            case 2:
+                return parseInt(Math.random() * (max - min + 1) + min, 10);
+                break;
+            default:
+                return 0;
+                break;
+        }
     }
 
     /**
@@ -74,7 +94,15 @@ window.onload = function () {
      */
     function randomHole(holes) {
         // TODO: 写地鼠随机选择钻出地洞的逻辑，如果与上一个是相同地洞，则重新选择一个地洞.
-        return null;
+        var number = holes.length;
+        var randomNum = Math.random() * number;
+        var nowHole = parseInt(randomNum, 10); // 2
+        while (nowHole == lastHole) {
+            randomNum = Math.random() * number;;
+            nowHole = parseInt(randomNum, 10);
+        }
+        lastHole = nowHole;
+        return nowHole;
     }
 
     /**
@@ -85,13 +113,40 @@ window.onload = function () {
      */
     function comeOutAndStop(hole, time) {
         // TODO: 写地鼠出洞并停留相应时间，如果游戏时间未结束(timeUp)，继续出洞(peep).
+        if (!timeUp) {
+            var which = holes[hole];
+            var a = 10;
+            console.log(reGameTime);
+            which.classList.add('up');
+            //console.log(hole+'出洞啦');
+            setTimeout(() => {
+                which.classList.remove('up');
+                reGameTime -= time;
+                console.log(gameTime);
+                if (reGameTime <= 0) {
+                    timeUp = true;
+                } else {
+                    peep();
+                }
+            }, time);
+        }
     }
 
     /**
      * 打地鼠。为每个moles添加点击事件，点击后分数显示+1，地鼠入洞。
      */
-    moles.forEach(mole => mole.addEventListener('click', function (e) {
-        // TODO: 在这里写用户点击地鼠发生的事.
-    }));
+    moles.forEach(function (mole, index) {
+        mole.addEventListener('click', function () {
+            holes[index].classList.remove('up');
+            score++;
+            scoreBoard.innerHTML = score;
+            
+        });
+    });
+    // moles.forEach(mole => mole.addEventListener('click', function (e) {
+    //     // TODO: 在这里写用户点击地鼠发生的事.
+    //     score++;
+
+    // }));
 
 };
